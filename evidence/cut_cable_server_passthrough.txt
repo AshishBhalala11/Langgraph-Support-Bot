@@ -1,0 +1,82 @@
+
+[drill] gateway attempt 1/5
+[drill] relay on http://127.0.0.1:59201/v1; now POST to http://127.0.0.1:8103/api/stream
+
+==========================================================================
+SSE STREAM FROM http://127.0.0.1:8103/api/stream
+==========================================================================
+[drill] restored default routing (synthesizer -> frontier)
+[drill] cleared tier health: {'frontier': 'closed', 'standard': 'closed', 'utility': 'closed'}
+[drill] injected at the gateway via /admin/inject-failure (tier=frontier, model=openai/gpt-4o)
+
+HTTP 200 text/event-stream; charset=utf-8
+
+
+   run.end: {'type': 'run.end', 'thread_id': 'cb8f5f30-5914-4da6-ad2c-4e835506e3a7', 'elapsed_ms': 23394.68420900812, 'final_response': 'The analysis is complete. No further action is required.', 'category': 'api', 'tiers_used': ['standard'], 'swap_cou
+
+[drill] cleared the injected fault; the gateway is back on its real provider
+
+   received 16 events, 2 token chunks from tiers ['standard']
+
+   INCONCLUSIVE: the graph answered without the synthesizer, so the injected tier was never called. tiers_used=['standard'], chunks came from ['standard'], and the relay was forwarding everything. Nothing was sent through it, so this run tested no fallback.
+[drill] attempt 1: the graph answered without the synthesizer, so the injected tier was never called
+
+[drill] gateway attempt 2/5
+[drill] relay on http://127.0.0.1:59267/v1; now POST to http://127.0.0.1:8103/api/stream
+
+==========================================================================
+SSE STREAM FROM http://127.0.0.1:8103/api/stream
+==========================================================================
+[drill] restored default routing (synthesizer -> frontier)
+[drill] cleared tier health: {'frontier': 'closed', 'standard': 'closed', 'utility': 'closed'}
+[drill] injected at the gateway via /admin/inject-failure (tier=frontier, model=openai/gpt-4o)
+
+HTTP 200 text/event-stream; charset=utf-8
+
+
+   run.end: {'type': 'run.end', 'thread_id': '70f607c0-ce8e-4683-9aff-93583e6ef41b', 'elapsed_ms': 14046.275874992716, 'final_response': 'The analysis is complete. No further action is required.', 'category': 'api', 'tiers_used': ['standard'], 'swap_co
+
+[drill] cleared the injected fault; the gateway is back on its real provider
+
+   received 30 events, 2 token chunks from tiers ['standard']
+
+   INCONCLUSIVE: the graph answered without the synthesizer, so the injected tier was never called. tiers_used=['standard'], chunks came from ['standard'], and the relay was forwarding everything. Nothing was sent through it, so this run tested no fallback.
+[drill] attempt 2: the graph answered without the synthesizer, so the injected tier was never called
+
+[drill] gateway attempt 3/5
+[drill] relay on http://127.0.0.1:59316/v1; now POST to http://127.0.0.1:8103/api/stream
+
+==========================================================================
+SSE STREAM FROM http://127.0.0.1:8103/api/stream
+==========================================================================
+[drill] restored default routing (synthesizer -> frontier)
+[drill] cleared tier health: {'frontier': 'closed', 'standard': 'closed', 'utility': 'closed'}
+[drill] injected at the gateway via /admin/inject-failure (tier=frontier, model=openai/gpt-4o)
+
+HTTP 200 text/event-stream; charset=utf-8
+
+
+   run.end: {'type': 'run.end', 'thread_id': 'dea8db89-3d09-4342-9576-cb9ce912bb48', 'elapsed_ms': 18165.356957993936, 'final_response': 'To effectively implement API rate limiting, consider the following components:\n\n1. **Rate Limit Headers**: These
+
+[drill] cleared the injected fault; the gateway is back on its real provider
+
+   received 288 events, 260 token chunks from tiers ['frontier']
+
+==========================================================================
+ASSERTIONS (shared)
+==========================================================================
+PASS  client connection stayed open   288 events, stream ended cleanly
+PASS  the streamed answer reached the client   1219 chars
+PASS  client-visible stream matches the final answer   1219 streamed vs 1219 final
+PASS  no run.error event
+PASS  tokens streamed incrementally, not in one burst   260 tokens over 1901ms
+
+==========================================================================
+ASSERTIONS (passthrough control)
+==========================================================================
+PASS  relay ran without injecting a fault
+PASS  no swap was needed   0 swap(s)
+PASS  single tier served the whole response   ['frontier']
+passed 8   failed 0
+
+CUT CABLE PASSED -- connection survived, cascade recovered mid-stream.

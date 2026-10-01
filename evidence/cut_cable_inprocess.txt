@@ -1,0 +1,67 @@
+[drill] cutting relay listening on http://127.0.0.1:59129/v1
+[drill] injected at tier: frontier -> http://127.0.0.1:59129/v1
+
+==========================================================================
+STREAMING (single connection, tiers may change mid-response)
+==========================================================================
+prompt: Explain in detail how API rate limiting works for developers, includin...
+
+   [relay] *** HARD CUT after ~2506 response bytes ***
+   [frontier ] 'API'
+   [frontier ] ' rate'
+   [frontier ] ' limiting'
+   [standard ] " is a crucial mechanism for managing the usage of an API, ensuring its stability, preventing abuse, and providing fair access to all users. For developers, understanding how rate limiting works is essential for building robust and reliable applications that interact with external APIs.\n\n### Why API Rate Limiting?\n\nBefore diving into the technical details, let's briefly"
+   [standard ] ' touch upon the primary reasons APIs implement rate limiting:\n\n1.  **Preventing Abuse and DDoS Attacks:** Without rate limits, malicious actors could flood an API with requests, leading'
+   [standard ] ' to denial-of-service (DoS) or distributed denial-of-service (DDoS) attacks, making the API unavailable for legitimate users.\n2.  **Ensuring Fair Usage:** Rate limits prevent a single user or application from monopol'
+   ... 48 chunks total over 21.9s
+
+
+==========================================================================
+FAILURE
+==========================================================================
+relay cut injected      : True (2506 bytes forwarded)
+error surfaced to client: none
+
+provider.swap:
+   frontier (openai/gpt-4o)  ->  standard (google/gemini-2.5-flash)
+   reason              : OpenAIConnectionError
+   chunks before swap  : 3
+   partial text        : 'API rate limiting'
+   overlap stripped    : 0 chars
+   breaker opened      : False
+
+==========================================================================
+TRANSCRIPT
+==========================================================================
+head:
+API rate limiting is a crucial mechanism for managing the usage of an API, ensuring its stability, preventing abuse, and providing fair access to all users. For developers, understanding how rate limiting works is essential for building robust and reliable applications that interact with external AP
+
+seam (chars 0-107):
+'API rate limiting is a crucial mechanism for managing the usage of an API, ensuring its stability, preventi'
+
+tail:
+lly handle API constraints, ensuring a positive experience for their users and a stable environment for the API provider. Ignoring these principles can lead to application failures, IP blacklisting, and a poor reputation with API providers.
+
+==========================================================================
+ASSERTIONS
+==========================================================================
+PASS  relay actually severed the connection   after 2506 bytes
+PASS  client received tokens from the doomed tier before the cut   first chunk tier=frontier, 3 chunk(s) from frontier
+PASS  a provider failure was recorded, not swallowed   None
+PASS  cascade emitted a provider.swap event   1 event(s)
+PASS  swap went frontier -> a lower tier   frontier -> standard
+PASS  failure was a real transport error   OpenAIConnectionError
+PASS  tier 2 continued the same response   final text begins with the partial
+PASS  no duplicated word at the seam   stripped 0 chars
+PASS  chunks arrived from two different tiers   ['frontier', 'standard']
+PASS  the connection was never dropped (one continuous stream)   client-visible stream == final text
+PASS  cascade reported no exhausted error   clean
+PASS  response is substantial (not a truncated stub)   12262 chars
+PASS  circuit breaker recorded the failure   {"state": "closed", "consecutive_failures": 1, "threshold": 3, "successes": 0, "opens": 0, "permanent": false, "last_error": "OpenAIConnectionError: Connection error.", "probe_in_flight": false, "probe_rejections": 0}
+
+==========================================================================
+RESULT
+==========================================================================
+passed 13   failed 0
+
+CUT CABLE PASSED -- connection survived, cascade recovered mid-stream.

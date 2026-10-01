@@ -1,0 +1,46 @@
+# --- Secrets -------------------------------------------------------------
+# Every .env variant is ignored, not just .env: a .env.local or
+# .env.production holding a real key is the same leak. The committed template
+# is re-included below, because the quick start depends on it.
+.env
+.env.*
+!.env.example
+
+# --- Databases -----------------------------------------------------------
+# Runtime state, never source: budget ledger, LangGraph checkpoints, semantic
+# cache, Phoenix span store.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# --- Python --------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Build / packaging ---------------------------------------------------
+dist/
+build/
+
+# --- Logs ----------------------------------------------------------------
+*.log
+
+# --- Editors and OS ------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store

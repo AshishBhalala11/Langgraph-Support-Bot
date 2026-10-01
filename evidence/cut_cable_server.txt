@@ -1,0 +1,48 @@
+
+[drill] gateway attempt 1/5
+[drill] relay on http://127.0.0.1:59153/v1; now POST to http://127.0.0.1:8103/api/stream
+
+==========================================================================
+SSE STREAM FROM http://127.0.0.1:8103/api/stream
+==========================================================================
+[drill] restored default routing (synthesizer -> frontier)
+[drill] cleared tier health: {'frontier': 'closed', 'standard': 'closed', 'utility': 'closed'}
+[drill] injected at the gateway via /admin/inject-failure (tier=frontier, model=openai/gpt-4o)
+
+HTTP 200 text/event-stream; charset=utf-8
+
+   [relay] *** HARD CUT after ~2213 response bytes ***
+
+   *** provider.swap: frontier -> standard (OpenAIConnectionError) ***
+       partial: 'To address the'
+
+   run.end: {'type': 'run.end', 'thread_id': 'de83b278-73b3-414b-9b63-a91f94196962', 'elapsed_ms': 14112.972874994739, 'final_response': 'To address the original issue, implement API rate limiting using the token bucket algorithm. Include standard rate
+
+[drill] cleared the injected fault; the gateway is back on its real provider
+
+   received 33 events, 4 token chunks from tiers ['frontier', 'standard']
+
+==========================================================================
+ASSERTIONS (shared)
+==========================================================================
+PASS  client connection stayed open   33 events, stream ended cleanly
+PASS  the streamed answer reached the client   328 chars
+PASS  client-visible stream matches the final answer   328 streamed vs 328 final
+PASS  no run.error event
+PASS  tokens streamed incrementally, not in one burst   4 tokens over 1793ms
+
+==========================================================================
+ASSERTIONS (injected fault)
+==========================================================================
+PASS  client received tokens from the doomed tier before the cut   first chunk tier=frontier, 3 chunk(s) from frontier
+PASS  a provider failure was recorded, not swallowed   OpenAIConnectionError
+PASS  a provider.swap event was emitted over the wire   1 event(s)
+PASS  swap went frontier -> a lower tier   frontier -> standard
+PASS  failure was a real transport error   OpenAIConnectionError
+PASS  chunks arrived from two different tiers   ['frontier', 'standard']
+PASS  the lower tier continued the same answer   final answer begins with the doomed tier's partial text
+PASS  the delivered text is not a doubled word   doubled_word=False
+PASS  the seam did not weld two words together   junction='e ' at char 14
+passed 14   failed 0
+
+CUT CABLE PASSED -- connection survived, cascade recovered mid-stream.
