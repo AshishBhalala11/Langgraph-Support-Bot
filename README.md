@@ -10,66 +10,6 @@ a production outage.
 
 ---
 
-## Features
-
-### Core
-- Support bot for developer-platform tickets (API, billing, outage, bug, general)
-- Browser console with sample tickets and live diagnostics panels
-- FastAPI service with sync, streaming, and async job APIs
-
-### Multi-agent system
-- Ingress security gate → classifier → category routing
-- Supervisor with structured worker selection and delegation limits
-- ReAct support agent with tool binding and iteration circuit breaker
-- Parallel specialists: API analysis, billing analysis, outage analysis
-- Outage dispatcher fan-out (LangGraph `Send`)
-- Answer synthesizer (deferred under the cascade so tokens stream from the ladder)
-- Context summarization and message deduplication
-- Multi-turn threads via SQLite checkpoints (`support.db`)
-
-### Tools & integrations
-- Mock CRM: `lookup_developer_account`
-- Knowledge base search: `search_knowledge_base`
-- Service status board: `check_service_status`
-- GitHub issue creation — mock by default; live API when `GITHUB_TOKEN` / `GITHUB_REPO` are set
-- Idempotent GitHub write keys; HITL gate on high/critical outage drafts
-
-### Security
-- Ingress PII redaction (Presidio + spaCy, or regex fallback)
-- Prompt-injection blocking with `BLK-…` reference IDs
-- Egress PII and uncertainty flagging
-- Cache identity-marker blocking (no cross-tenant / account leakage)
-
-### Human-in-the-loop
-- Suspend runs on GitHub write (`awaiting_human`)
-- Approve, deny, or edit-and-approve issue drafts
-- Pending-approvals listing and UI controls
-
-### Streaming & APIs
-- Token-level SSE with typed lifecycle / tool / cache / swap / interrupt events
-- Synchronous ticket run and async job submit + poll
-- Thread list, conversation history, forensics, and built-in verification suite
-- Health, FinOps, judge, cache, and SLO endpoints
-- Loopback-guarded admin: fault inject/clear, reset breakers, reset tier assignments
-
-### Reliability & cost
-- Three-tier cascade (frontier → standard → utility) with mid-stream continuation stitching
-- Per-tier circuit breakers
-- Dynamic per-agent model routing + SQLite budget ledger and hard caps
-- Semantic answer cache (embeddings or exact match) with savings accounting
-- Cut-the-cable TCP relay fault injection and automated failure drills
-- Provider portability: OpenRouter, Ollama (CPU), vLLM (GPU), and `auto` fallback
-
-### Quality & ops
-- Post-response LLM judge (correctness, safety, tone)
-- Rolling SLO evaluation with automatic demotion and alert-only paths
-- OpenTelemetry tracing with Phoenix export / in-memory span store
-- Token and USD usage accounting
-- Checkpoint time-travel branching and state correction APIs
-- Offline and live test packs (cascade, breakers, streaming, judge/cache, providers, CPU-only)
-
----
-
 ## Quick start (macOS)
 
 **Requires Python 3.12.** `scipy`, pulled in by `arize-phoenix`, declares
@@ -211,7 +151,65 @@ question twice will hit the cache, which is correct behaviour.
 
 ---
 
+## Features
 
+### Core
+- Support bot for developer-platform tickets (API, billing, outage, bug, general)
+- Browser console with sample tickets and live diagnostics panels
+- FastAPI service with sync, streaming, and async job APIs
+
+### Multi-agent system
+- Ingress security gate → classifier → category routing
+- Supervisor with structured worker selection and delegation limits
+- ReAct support agent with tool binding and iteration circuit breaker
+- Parallel specialists: API analysis, billing analysis, outage analysis
+- Outage dispatcher fan-out (LangGraph `Send`)
+- Answer synthesizer (deferred under the cascade so tokens stream from the ladder)
+- Context summarization and message deduplication
+- Multi-turn threads via SQLite checkpoints (`support.db`)
+
+### Tools & integrations
+- Mock CRM: `lookup_developer_account`
+- Knowledge base search: `search_knowledge_base`
+- Service status board: `check_service_status`
+- GitHub issue creation — mock by default; live API when `GITHUB_TOKEN` / `GITHUB_REPO` are set
+- Idempotent GitHub write keys; HITL gate on high/critical outage drafts
+
+### Security
+- Ingress PII redaction (Presidio + spaCy, or regex fallback)
+- Prompt-injection blocking with `BLK-…` reference IDs
+- Egress PII and uncertainty flagging
+- Cache identity-marker blocking (no cross-tenant / account leakage)
+
+### Human-in-the-loop
+- Suspend runs on GitHub write (`awaiting_human`)
+- Approve, deny, or edit-and-approve issue drafts
+- Pending-approvals listing and UI controls
+
+### Streaming & APIs
+- Token-level SSE with typed lifecycle / tool / cache / swap / interrupt events
+- Synchronous ticket run and async job submit + poll
+- Thread list, conversation history, forensics, and built-in verification suite
+- Health, FinOps, judge, cache, and SLO endpoints
+- Loopback-guarded admin: fault inject/clear, reset breakers, reset tier assignments
+
+### Reliability & cost
+- Three-tier cascade (frontier → standard → utility) with mid-stream continuation stitching
+- Per-tier circuit breakers
+- Dynamic per-agent model routing + SQLite budget ledger and hard caps
+- Semantic answer cache (embeddings or exact match) with savings accounting
+- Cut-the-cable TCP relay fault injection and automated failure drills
+- Provider portability: OpenRouter, Ollama (CPU), vLLM (GPU), and `auto` fallback
+
+### Quality & ops
+- Post-response LLM judge (correctness, safety, tone)
+- Rolling SLO evaluation with automatic demotion and alert-only paths
+- OpenTelemetry tracing with Phoenix export / in-memory span store
+- Token and USD usage accounting
+- Checkpoint time-travel branching and state correction APIs
+- Offline and live test packs (cascade, breakers, streaming, judge/cache, providers, CPU-only)
+
+---
 
 ## Providers
 
