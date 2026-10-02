@@ -32,9 +32,18 @@ python api.py
 
 Open [http://localhost:8000](http://localhost:8000).
 
-Optional, for the trace UI: `./venv/bin/phoenix serve`, then
-[http://localhost:6006](http://localhost:6006). The app does not depend on it; without a collector
-running, traces queue in-process and export on the next start.
+### Trace viewer (Phoenix) — recommended
+
+```bash
+./venv/bin/phoenix serve            # then open http://localhost:6006
+```
+
+Every ticket produces one trace: a span per graph node (with measured
+durations), per LLM call (tagged with the tier and model that served it), per
+tool call, and per cascade swap, plus tokens and cost. Open an LLM span to see
+its prompt and completion. The app runs fine without the collector — spans
+queue in-process and export on the next start — but without it you are flying
+blind on routing, degradation, and cost.
 
 Without `en_core_web_lg`, Presidio falls back to regex-based PII scrubbing and
 logs that at startup. With the model installed you should see
