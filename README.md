@@ -21,6 +21,12 @@ python3.12 -m venv venv
 source venv/bin/activate
 python -m pip install -r requirements.txt
 cp .env.example .env                # then set OPENROUTER_API_KEY in .env
+
+# Optional but recommended: spaCy model for Presidio PII scrubbing (~400 MB).
+# On macOS, `python -m spacy download en_core_web_lg` often fails with a
+# 0-byte / invalid wheel — install from the release URL instead:
+pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl
+
 python api.py
 ```
 
@@ -30,8 +36,9 @@ Optional, for the trace UI: `./venv/bin/phoenix serve`, then
 [http://localhost:6006](http://localhost:6006). The app does not depend on it; without a collector
 running, traces queue in-process and export on the next start.
 
-The spaCy model `en_core_web_lg` is not required. Presidio falls back to
-regex-based PII scrubbing without it and says so at startup.
+Without `en_core_web_lg`, Presidio falls back to regex-based PII scrubbing and
+logs that at startup. With the model installed you should see
+`[security] Presidio active (spaCy en_core_web_lg)`.
 
 ### Configuration
 
@@ -189,8 +196,6 @@ question twice will hit the cache, which is correct behaviour.
 ### Streaming & APIs
 - Token-level SSE with typed lifecycle / tool / cache / swap / interrupt events
 - Synchronous ticket run and async job submit + poll
-- Thread list, conversation history, forensics, and built-in verification suite
-- Health, FinOps, judge, cache, and SLO endpoints
 - Loopback-guarded admin: fault inject/clear, reset breakers, reset tier assignments
 
 ### Reliability & cost
@@ -207,7 +212,6 @@ question twice will hit the cache, which is correct behaviour.
 - OpenTelemetry tracing with Phoenix export / in-memory span store
 - Token and USD usage accounting
 - Checkpoint time-travel branching and state correction APIs
-- Offline and live test packs (cascade, breakers, streaming, judge/cache, providers, CPU-only)
 
 ---
 
@@ -257,12 +261,13 @@ This project runs on CPU-only machines; it does not require a GPU.
 ```
 POST /api/stream
   │
-  ├─ semantic cache lookup ────────────── hit? → stream cached answer, $0
+  ├─ semantic cache lookup ─── hit? → stream cached answer, $0
   │
   ├─ LangGraph swarm (support_agent.py)
-  │    classify → parallel specialists → [HITL gate] → synthesizer (skipped)
+  │    triage → supervisor loop (ReAct agent) | dispatcher fan-out (specialists)
+  │    HITL suspends the run before any GitHub write; synthesis is deferred
   │
-  ├─ CascadeRunner: frontier → standard → utility
+  ├─ CascadeRunner: frontier → standard → utility ── streams the answer token by token
   │    per-tier breaker, per-tier span, hot-swap on retryable failure
   │
   └─ LLM judge + cache store + SLO sample   (all after the last frame)
@@ -315,6 +320,7 @@ evidence/           Recorded drill output
 | `GET /api/pending-approvals`                    | Runs suspended on the HITL gate                   |
 | `POST /api/approve/{id}`, `POST /api/deny/{id}` | Resolve a suspended run                           |
 | `GET /api/forensics/{id}`                       | Per-node timings, tokens, cost, anomalies         |
+| `POST /api/time-travel`, `POST /api/correct`    | Branch a checkpoint, correct saved state          |
 | `GET /api/verify`                               | Runs the verification suite                       |
 | `POST /admin/inject-failure`                    | Point a tier at the fault relay (loopback only)   |
 | `DELETE /admin/inject-failure/{tier}`           | Restore a tier's real provider (loopback only)    |
@@ -326,12 +332,9 @@ Admin endpoints are **enforced** loopback-only, not merely documented — an
 exposed copy could redirect the bot's credentials at an attacker's server. Set
 `P4_ADMIN_TOKEN` when behind a proxy.
 
-`reset-assignments` exists because SLO demotions persist by design, and that
-breaks the fault drill in a way that looks like success. With the synthesizer
-demoted to `standard` by an earlier latency breach, a drill that injects a fault
-at `frontier` never touches the injected tier — the run starts mid-ladder, the
-cascade has nothing to fall back from, and the drill reports a pass having
-demonstrated nothing.
+`reset-assignments` exists because SLO demotions persist by design: with the
+synthesizer demoted to `standard`, a drill injecting a fault at `frontier` never
+touches the injected tier, and reports a pass having demonstrated nothing.
 
 ---
 
@@ -431,7 +434,7 @@ normal request.
 - Single-process breaker state; no shared store across workers.
 - In-memory job queue; lost on restart.
 - Degradation actions live in router state and do not survive a restart.
-- PII scrubbing falls back to regex without `en_core_web_lg` installed.
+- PII scrubbing falls back to regex without `en_core_web_lg` installed (see Quick start for the macOS install command).
 - No GPU was available, so vLLM has never been exercised against a real server.
 - One GitHub-issue text in the drill evidence is seam-demonstration output, not a
 clean answer.
